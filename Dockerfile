@@ -1,2 +1,2 @@
-FROM docker.io/python:slim
-RUN pip install requests
+FROM node:lts
+RUN npm install -g newman

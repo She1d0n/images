@@ -1,2 +1,2 @@
 FROM node:lts
-RUN npm install -g 
+RUN npm install -g gitbook-cli

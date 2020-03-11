@@ -1,12 +1,33 @@
-FROM golang:1.13.5-alpine as build
+# ----------------
+# STEP 1:
+# build with pkg
+FROM node:latest AS build
+WORKDIR /app
 
-WORKDIR /go/src
-COPY src /go/src
+# install dependencies with cache
+COPY package.json .
+COPY yarn.lock .
+RUN yarn
+# copy app files, build and package
+COPY . /app
 
-RUN go get
-RUN go install
-RUN go build
+ENV PORT 8080
+ENV PKG_CACHE_PATH .pkg-cache-upx
 
-FROM alpine
-COPY --from=build /go/src/kube-scan /
-CMD ["/kube-scan"]
+RUN yarn build --prod && npx pkg . -t node8-alpine-x64 --output app
+
+# ----------------
+# STEP 2:
+# run with alpine
+FROM alpine:latest
+WORKDIR /app
+ENV NODE_ENV=production
+
+# install required libs
+RUN apk update && apk add --no-cache libstdc++ libgcc
+
+# copy prebuilt binary from previous step
+COPY --from=build /app/app /app/app
+COPY --from=build /app/build/public /app/build/public
+
+CMD ["/app/app"]

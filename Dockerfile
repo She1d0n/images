@@ -1,4 +1,4 @@
-FROM beevelop/android-nodejs
+FROM soluto/android-nodejs:latest
 
 MAINTAINER Sheldon
 
